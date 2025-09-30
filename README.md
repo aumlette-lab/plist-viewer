@@ -1,6 +1,6 @@
 # 📂 Plist Viewer
 
-A simple web app to upload and explore **`.plist`** or **`.archive`** files.  
+A simple web app to upload and explore **`.plist`** file.  
 It parses both XML and binary plist formats, flattens nested objects, and lets you:
 
 - ✅ Upload `.plist` files  
