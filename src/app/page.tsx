@@ -75,7 +75,7 @@ export default function Page() {
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">Plist / Archive Viewer</h1>
         <p className="text-sm text-gray-600">
-          Upload a <code>.plist</code> or Procreate <code>.archive</code> file (XML or binary). We parse it server‑side,
+          Upload a <code>.plist</code> file (XML or binary). We parse it server‑side,
           flatten nested keys, and render a sortable table. Export to CSV or XLSX.
         </p>
       </header>
