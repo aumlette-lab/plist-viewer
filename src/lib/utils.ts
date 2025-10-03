@@ -26,15 +26,3 @@ export function flattenObject(input: any, prefix = ""): FlattenedRow[] {
   }
   return rows;
 }
-
-export function toCSV(rows: FlattenedRow[]): string {
-  const esc = (s: string) => {
-    if (s.includes('"') || s.includes(",") || s.includes("\n")) {
-      return `"${s.replace(/"/g, '""')}"`;
-    }
-    return s;
-  };
-  const head = "key,value";
-  const body = rows.map(r => `${esc(r.key)},${esc(r.value)}`).join("\n");
-  return head + "\n" + body;
-}

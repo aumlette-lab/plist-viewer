@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { flattenObject, toCSV, type FlattenedRow } from "@/lib/utils";
-import { exportXLSX } from "@/lib/export-xlsx";
+import { flattenObject, type FlattenedRow } from "@/lib/utils";
+import { exportCSV, exportXLSX } from "@/lib/export-xlsx";
 
 type Sort = { key: "key" | "value"; dir: "asc" | "desc" };
 
@@ -60,14 +60,11 @@ export default function Page() {
   }, [rows, filter, sort]);
 
   function downloadCSV() {
-    const csv = toCSV(filtered);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "plist.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    exportCSV(filtered);
+  }
+
+  function downloadXLSX() {
+    exportXLSX(filtered);
   }
 
   return (
@@ -123,7 +120,7 @@ export default function Page() {
           />
           <div className="flex gap-2">
             <button className="btn" onClick={downloadCSV}>Export CSV</button>
-            <button className="btn btn-primary" onClick={() => exportXLSX(filtered)}>Export XLSX</button>
+            <button className="btn btn-primary" onClick={downloadXLSX}>Export XLSX</button>
           </div>
         </div>
 
