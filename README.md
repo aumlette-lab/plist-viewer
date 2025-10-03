@@ -1,13 +1,15 @@
-# 📂 Plist Viewer
+# 📂 Plist / Archive Comparator
 
-A simple web app to upload and explore **`.plist`** file.  
-It parses both XML and binary plist formats, flattens nested objects, and lets you:
+Modern viewer for Apple property lists and archives. Parse XML or binary plists, flatten nested structures, compare two files side by side, and export the results.
 
-- ✅ Upload `.plist` files  
-- ✅ View keys/values in a sortable, filterable table  
-- ✅ Export results to **CSV** or **XLSX**  
+### ✅ Current Features
 
-Built with **Next.js**, **TypeScript**, and **shadcn/ui** components.  
+- Dual-file uploader with replace/remove actions, filename and size labels
+- Three viewing modes: File A, File B, and Comparison (diff badges for same/different/missing keys)
+- Sortable, filterable tables with live counts of total and filtered rows
+- CSV/XLSX export that mirrors the active view (dynamic column titles, filenames)
+- Light/dark theme toggle with persisted preference
+- Powered by **Next.js**, **TypeScript**, **Tailwind CSS**, and **xlsx**
 
 ---
 
