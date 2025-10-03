@@ -1,23 +1,33 @@
 import * as XLSX from "xlsx";
-import { FlattenedRow } from "./utils";
 
 export type ExportFormat = "csv" | "xlsx";
+
+export type ExportRow = Record<string, string | null>;
+
+export type ExportConfig = {
+  columns: string[];
+  fileName?: string;
+  sheetName?: string;
+};
 
 const DEFAULT_FILENAMES: Record<ExportFormat, string> = {
   csv: "plist.csv",
   xlsx: "plist.xlsx",
 };
 
-function buildWorkbook(rows: FlattenedRow[]) {
-  const ws = XLSX.utils.json_to_sheet(rows);
+function buildWorkbook(rows: ExportRow[], columns: string[], sheetName: string) {
+  const ws = rows.length
+    ? XLSX.utils.json_to_sheet(rows, { header: columns })
+    : XLSX.utils.aoa_to_sheet([columns]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "plist");
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
   return { wb, ws };
 }
 
-export function exportRows(rows: FlattenedRow[], format: ExportFormat, fileName?: string) {
+function exportRows(rows: ExportRow[], format: ExportFormat, config: ExportConfig) {
+  const { columns, fileName, sheetName } = config;
   const targetName = fileName ?? DEFAULT_FILENAMES[format];
-  const { wb, ws } = buildWorkbook(rows);
+  const { wb, ws } = buildWorkbook(rows, columns, sheetName ?? "plist");
 
   if (format === "csv") {
     const csv = XLSX.utils.sheet_to_csv(ws);
@@ -34,10 +44,10 @@ export function exportRows(rows: FlattenedRow[], format: ExportFormat, fileName?
   XLSX.writeFile(wb, targetName, { bookType: "xlsx" });
 }
 
-export function exportCSV(rows: FlattenedRow[], fileName?: string) {
-  exportRows(rows, "csv", fileName);
+export function exportCSV(rows: ExportRow[], config: ExportConfig) {
+  exportRows(rows, "csv", config);
 }
 
-export function exportXLSX(rows: FlattenedRow[], fileName?: string) {
-  exportRows(rows, "xlsx", fileName);
+export function exportXLSX(rows: ExportRow[], config: ExportConfig) {
+  exportRows(rows, "xlsx", config);
 }
