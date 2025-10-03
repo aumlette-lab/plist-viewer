@@ -2,14 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+.dark :root { color-scheme: dark; }
 :root { color-scheme: light; }
-body { @apply bg-gray-50 text-gray-900; }
+body { @apply bg-gray-50 text-gray-900 transition-colors; }
+.dark body { @apply bg-gray-950 text-gray-100; }
 .container { @apply max-w-5xl mx-auto px-4; }
-.card { @apply bg-white shadow-sm rounded-2xl border border-gray-200; }
-.btn { @apply inline-flex items-center rounded-md px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-gray-50 active:bg-gray-100; }
+.card { @apply bg-white shadow-sm rounded-2xl border border-gray-200 transition-colors; }
+.dark .card { @apply bg-gray-900 border-gray-700 text-gray-100; }
+.btn { @apply inline-flex items-center rounded-md px-4 py-2 text-sm font-medium border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors; }
+.dark .btn { @apply border-gray-600 text-gray-100 hover:bg-gray-800 active:bg-gray-700; }
 .btn-primary { @apply bg-gray-900 text-white border-transparent hover:bg-gray-800; }
-.input { @apply block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20; }
+.dark .btn-primary { @apply bg-gray-100 text-gray-900 hover:bg-gray-200; }
+.input { @apply block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 transition-colors; }
+.dark .input { @apply border-gray-600 bg-gray-900 text-gray-100 placeholder:text-gray-400 focus:ring-gray-100/20; }
 .table { @apply min-w-full text-sm; }
-.th { @apply text-left font-semibold py-2 border-b; }
-.td { @apply py-2 border-b; }
+.th { @apply text-left font-semibold py-2 border-b border-gray-200; }
+.td { @apply py-2 border-b border-gray-200; }
+.dark .th { @apply border-gray-700 text-gray-200; }
+.dark .td { @apply border-gray-800/80 text-gray-100; }
 .badge { @apply inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700; }
+.dark .badge { @apply bg-gray-800 text-gray-100; }

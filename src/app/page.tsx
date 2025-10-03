@@ -13,6 +13,7 @@ type SlotKey = "a" | "b";
 type ViewMode = "a" | "b" | "compare";
 type SortKey = "key" | "valueA" | "valueB" | "status";
 type Sort = { key: SortKey; dir: "asc" | "desc" };
+type Theme = "light" | "dark";
 
 type FileSlotState = {
   name: string | null;
@@ -102,14 +103,100 @@ function getSortValue(row: DisplayRow, key: SortKey): string {
   }
 }
 
+function SunIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M10 14.167a4.167 4.167 0 1 0 0-8.334 4.167 4.167 0 0 0 0 8.334Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 1.667v1.666M10 16.667v1.666M3.516 3.516l1.179 1.179M15.305 15.305l1.179 1.179M1.667 10h1.666M16.667 10h1.666M3.516 16.484l1.179-1.179M15.305 4.695l1.179-1.179"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M17.083 11.458a6.667 6.667 0 0 1-8.542-8.541 6.666 6.666 0 1 0 8.542 8.54Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M4.167 5.833h11.666M8.333 8.333v5M11.667 8.333v5M5.833 5.833l.511 8.617a1.667 1.667 0 0 0 1.662 1.55h3.988a1.667 1.667 0 0 0 1.662-1.55l.509-8.617M7.5 5.833V4.167A1.667 1.667 0 0 1 9.167 2.5h1.666a1.667 1.667 0 0 1 1.667 1.667v1.666"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function Page() {
   const [slots, setSlots] = useState<SlotsState>(() => ({ a: createEmptySlot(), b: createEmptySlot() }));
   const [viewMode, setViewMode] = useState<ViewMode>("compare");
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState<Sort>({ key: "key", dir: "asc" });
+  const [theme, setTheme] = useState<Theme>("light");
 
   const fileLabelA = slots.a.name ?? "File A";
   const fileLabelB = slots.b.name ?? "File B";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("plist-viewer-theme") as Theme | null;
+    if (stored === "light" || stored === "dark") {
+      setTheme(stored);
+      return;
+    }
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(prefersDark ? "dark" : "light");
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.style.colorScheme = theme;
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("plist-viewer-theme", theme);
+    }
+  }, [theme]);
 
   useEffect(() => {
     const allowed = ALLOWED_SORT_KEYS[viewMode];
@@ -188,6 +275,10 @@ export default function Page() {
       ...prev,
       [slot]: createEmptySlot(),
     }));
+  }
+
+  function toggleTheme() {
+    setTheme(prev => (prev === "light" ? "dark" : "light"));
   }
 
   function sortBy(key: SortKey) {
@@ -281,6 +372,7 @@ export default function Page() {
   }, [viewMode, slots, filter, sort, fileLabelA, fileLabelB]);
 
   function handleExport(format: "csv" | "xlsx") {
+    if (!viewData.total) return;
     const fileName = `${viewData.exportFileStem}.${format}`;
     const config = {
       columns: viewData.exportColumns,
@@ -307,11 +399,26 @@ export default function Page() {
   return (
     <div className="container py-10 space-y-6">
       <header className="space-y-2">
-        <h1 className="text-2xl font-bold">Plist / Archive Comparator</h1>
-        <p className="text-sm text-gray-600">
-          Upload up to two <code>.plist</code> or <code>.archive</code> files, compare their flattened key paths
-          side by side, and export the current view as CSV or XLSX.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Plist / Archive Comparator</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Upload up to two <code>.plist</code> or <code>.archive</code> files, compare their flattened key paths
+              side by side, and export the current view as CSV or XLSX.
+            </p>
+          </div>
+          <button
+            className="btn"
+            type="button"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+          >
+            {theme === "light" ? <MoonIcon /> : <SunIcon />}
+            <span className="ml-2 hidden sm:inline text-sm">
+              {theme === "light" ? "Dark" : "Light"} mode
+            </span>
+          </button>
+        </div>
       </header>
 
       <section className="card p-6 space-y-4">
@@ -321,26 +428,27 @@ export default function Page() {
             const inputId = `file-input-${slot}`;
             const label = slot === "a" ? "File A" : "File B";
             return (
-              <div key={slot} className="border border-gray-200 rounded-lg p-4 space-y-3">
+              <div key={slot} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-700">{label}</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</p>
                     {state.name ? (
-                      <p className="text-sm text-gray-600 break-all">{state.name}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 break-all">{state.name}</p>
                     ) : (
-                      <p className="text-xs text-gray-500">Select a file to parse and compare.</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Select a file to parse and compare.</p>
                     )}
                     {state.sizeLabel && (
-                      <p className="text-xs text-gray-500">Size: {state.sizeLabel}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Size: {state.sizeLabel}</p>
                     )}
                   </div>
                   {state.name && (
                     <button
-                      className="btn btn-sm border border-red-200 text-red-600 hover:bg-red-50"
+                      className="btn btn-sm px-2 border border-transparent text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
                       onClick={() => clearSlot(slot)}
                       type="button"
+                      aria-label="Remove file"
                     >
-                      Remove
+                      <TrashIcon />
                     </button>
                   )}
                 </div>
@@ -369,7 +477,7 @@ export default function Page() {
             );
           })}
         </div>
-        <p className="text-xs text-gray-500">Max file size: 10 MB per upload.</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Max file size: 10 MB per upload.</p>
       </section>
 
       <section className="card p-6 space-y-6">
@@ -381,7 +489,7 @@ export default function Page() {
               disabled={!slots.a.rows.length}
               onClick={() => setViewMode("a")}
             >
-              View {fileLabelA}
+              View File A
             </button>
             <button
               className={`btn ${viewMode === "b" ? "btn-primary" : ""}`}
@@ -389,7 +497,7 @@ export default function Page() {
               disabled={!slots.b.rows.length}
               onClick={() => setViewMode("b")}
             >
-              View {fileLabelB}
+              View File B
             </button>
             <button
               className={`btn ${viewMode === "compare" ? "btn-primary" : ""}`}
@@ -397,7 +505,7 @@ export default function Page() {
               disabled={compareDisabled}
               onClick={() => setViewMode("compare")}
             >
-              Compare {fileLabelA} &amp; {fileLabelB}
+              Compare A &amp; B
             </button>
           </div>
 
@@ -409,19 +517,29 @@ export default function Page() {
               onChange={event => setFilter(event.target.value)}
             />
             <div className="flex gap-2">
-              <button className="btn" type="button" onClick={() => handleExport("csv")}>
+              <button
+                className="btn"
+                type="button"
+                disabled={!viewData.total}
+                onClick={() => handleExport("csv")}
+              >
                 Export CSV
               </button>
-              <button className="btn btn-primary" type="button" onClick={() => handleExport("xlsx")}>
+              <button
+                className="btn btn-primary"
+                type="button"
+                disabled={!viewData.total}
+                onClick={() => handleExport("xlsx")}
+              >
                 Export XLSX
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            Viewing: <span className="font-medium text-gray-800">{viewTitle}</span>
+        <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-gray-300 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-gray-700 dark:text-gray-200">
+            Viewing: <span className="font-medium text-gray-900 dark:text-gray-100">{viewTitle}</span>
           </p>
           <p className="flex gap-4">
             <span>Total entries in current view: {viewData.total}</span>
